@@ -5,7 +5,7 @@ This is a really basic lisp interpreter. I went into this just as an exercise an
 Just your standard `cargo build` or `cargo build --release`. 
 
 # Usage
-Upon running the executable you will be dumped into a REPL. It should say `ready> ` and be waiting for input. The input system is extremely dumb, so it won't handle any kind of `readline` shortcuts or anything and will evaluate what you entered the moment you hit return, regardless of whether or not the statement is complete. This also means piping input from a file won't really work. This is something I intend to improve. In the REPL you can enter basic lisp code. If you enter `env` you can get a peek behind the curtain and see all the currently defined symbols in an extremely difficult to read format.
+Upon running the executable you will be dumped into a REPL. It should say `ready> ` and be waiting for input. The input system is extremely dumb, so it won't handle any kind of `readline` shortcuts or anything. It will, however, wait until a top-level statement is complete before evaluating it, i.e. you can have line-breaks in your input. In the REPL you can enter basic lisp code. If you enter `env` you can get a peek behind the curtain and see all the currently defined symbols in ~~an extremely difficult to read~~ a slightly easier to read format. You can also enter `exit` to quit the REPL.
 
 # The language itself
 This is, as of right now, an extremely tiny, barely functional subset of scheme lisp. The things you can do are as follows:
@@ -18,16 +18,22 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - The built in operator `+`, which adds its arguments.
    * Ex. `(+ 1 2)` evaluates to `3.0`
    * Ex. `(+ 1 2 -3)` evaluates to `0.0`
- - The built in operator `-`, which subtracts its arguments (**Note**: must take exactly 2 arguments).
+ - The built in operator `-`, which subtracts its arguments.
    * Ex. `(- 3.2 3)` evaluates to `0.2`
+   * Ex. `(- 1)` evaluates to `-1.0`
+   * Ex. `(- 3 2 1)` evaluates to `0.0`
  - The built in operator `*`, which multiplies its arguments.
    * Ex. `(* 3 2)` evaluates to `6.0`
    * Ex. `(* 1 2 3 4 5)` evaluates to `120.0`
- - The built in operator `/`, which divides its arguments (**Note**: must take exactly 2 arguments).
+ - The built in operator `/`, which divides its arguments.
    * Ex. `(/ 3 2)` evaluates to `1.5`
- - The built in operator `<`, which returns 1 if its first argument is less than its second argument and 0 otherwise
+   * Ex. `(/ 3 1 3)` evaluates to `1.0`
+   * Ex. `(/ 4 2 2)` evaluates to `1.0`
+ - The built in operator `<`, which returns 1 if its arguments are in increasing order and 0 otherwise
    * Ex. `(< 3 2)` returns `0.0`
    * Ex. `(< 2 3)` returns `1.0`
+   * Ex. `(< 1 2 3)` returns `1.0`
+   * Ex. `(< 1 3 2)` returns `0.0`
  - The built in operator `int`, which returns 1 if all of its arguments are integers and 0 otherwise
    * Ex. `(int 3.2)` returns `0.0`
    * Ex. `(int 2 3.0 5)` returns `1.0`
@@ -47,4 +53,4 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `(define >= (lambda (a b) (not (< a b))))` binds to the symbol `>=` the `>=` function.
 
 # Samples
-See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can rrun it with `cargo run --release < collatz.scm`. There will be quite a few artifacts from the REPL, and it will crash upon reaching EOF, but it does end up working, and printing the correct answer. Notice how, since input still kinda sucks right now, all the top-level bindings must be on their own line. I will fix that eventually.
+See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can rrun it with `cargo run --release < collatz.scm`. There will be quite a few artifacts from the REPL, but the number it spits out is correct.
