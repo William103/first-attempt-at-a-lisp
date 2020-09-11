@@ -18,22 +18,24 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - The built in operator `+`, which adds its arguments.
    * Ex. `(+ 1 2)` evaluates to `3.0`
    * Ex. `(+ 1 2 -3)` evaluates to `0.0`
- - The built in operator `-`, which subtracts its arguments.
+ - The built in operator `-`, which subtracts its arguments. If only one argument is given, it negates it.
    * Ex. `(- 3.2 3)` evaluates to `0.2`
    * Ex. `(- 1)` evaluates to `-1.0`
    * Ex. `(- 3 2 1)` evaluates to `0.0`
  - The built in operator `*`, which multiplies its arguments.
    * Ex. `(* 3 2)` evaluates to `6.0`
    * Ex. `(* 1 2 3 4 5)` evaluates to `120.0`
- - The built in operator `/`, which divides its arguments.
+ - The built in operator `/`, which divides its arguments. If only one argument is given, it returns the reciprocal.
    * Ex. `(/ 3 2)` evaluates to `1.5`
    * Ex. `(/ 3 1 3)` evaluates to `1.0`
    * Ex. `(/ 4 2 2)` evaluates to `1.0`
- - The built in operator `<`, which returns 1 if its arguments are in increasing order and 0 otherwise
+   * Ex. `(/ 5)` evaluates to `0.5`
+ - The built in operator `<`, which returns 1 if its arguments are strictly increasing and 0 otherwise
    * Ex. `(< 3 2)` returns `0.0`
    * Ex. `(< 2 3)` returns `1.0`
    * Ex. `(< 1 2 3)` returns `1.0`
    * Ex. `(< 1 3 2)` returns `0.0`
+   * Ex. `(< 3)` returns `1.0`
  - The built in operator `int`, which returns 1 if all of its arguments are integers and 0 otherwise
    * Ex. `(int 3.2)` returns `0.0`
    * Ex. `(int 2 3.0 5)` returns `1.0`
