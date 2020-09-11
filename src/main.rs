@@ -1,21 +1,13 @@
 use std::collections::HashMap;
-
-#[allow(unused_macros)]
-macro_rules! map {
-    { $($key:expr => $value:expr),+ } => {{
-        let mut m = std::collections::HashMap::new();
-        $(
-            m.insert($key, $value);
-        )+
-        m
-    }};
-}
+use std::io::prelude::*;
 
 #[derive(Clone, Debug)]
 enum TokenType {
     OpenParen,
     CloseParen,
     Lambda,
+    Define,
+    If,
     Identifier(String),
     Number(f64),
 }
@@ -39,6 +31,9 @@ impl Iterator for TokenIterator {
 
 impl TokenIterator {
     fn get_state(&self) -> Option<TokenType> {
+        if self.index >= self.data.len() {
+            return None;
+        }
         let current = &self.data[self.index];
         match current.as_str() {
             "(" => Some(TokenType::OpenParen),
@@ -49,6 +44,10 @@ impl TokenIterator {
                 } else {
                     if s == "lambda" {
                         Some(TokenType::Lambda)
+                    } else if s == "define" {
+                        Some(TokenType::Define)
+                    } else if s == "if" {
+                        Some(TokenType::If)
                     } else {
                         Some(TokenType::Identifier(s.to_string()))
                     }
@@ -100,6 +99,8 @@ enum Expression {
     Identifier(String),
     SExpression(Box<Expression>, Vec<Expression>),
     Lambda(Vec<String>, Box<Expression>),
+    Define(String, Box<Expression>),
+    If(Box<Expression>, Box<Expression>, Box<Expression>),
     Nil,
 }
 
@@ -107,6 +108,28 @@ fn parse_expression(current: &mut TokenIterator) -> Option<Expression> {
     match &current.get_state() {
         Some(TokenType::OpenParen) => {
             let next = current.next();
+            if let Some(TokenType::If) = next {
+                current.next();
+                let cond = parse_expression(current)?;
+                current.next();
+                let if_branch = parse_expression(current)?;
+                current.next();
+                let else_branch = parse_expression(current)?;
+                return Some(Expression::If(
+                    Box::new(cond),
+                    Box::new(if_branch),
+                    Box::new(else_branch),
+                ));
+            }
+            if let Some(TokenType::Define) = next {
+                if let Some(TokenType::Identifier(s)) = current.next() {
+                    current.next();
+                    let expr = parse_expression(current)?;
+                    return Some(Expression::Define(s, Box::new(expr)));
+                } else {
+                    panic!("Expected identifier after define!");
+                }
+            }
             if let Some(TokenType::Lambda) = next {
                 if let Some(TokenType::OpenParen) = current.next() {
                 } else {
@@ -145,6 +168,8 @@ fn parse_expression(current: &mut TokenIterator) -> Option<Expression> {
         Some(TokenType::Identifier(s)) => Some(Expression::Identifier(s.to_string())),
         Some(TokenType::Number(n)) => Some(Expression::Number(*n)),
         Some(TokenType::Lambda) => panic!("Lambda not expected in this position!"),
+        Some(TokenType::Define) => panic!("Define not expected in this position!"),
+        Some(TokenType::If) => panic!("If not expected in this position!"),
         None => panic!("Error!"),
     }
 }
@@ -167,7 +192,11 @@ fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<E
             None => Some(Expression::Identifier(s.clone())),
         },
         Expression::Lambda(params, body) => Some(Expression::Lambda(
-            params.iter().cloned().filter(|p| !env.contains_key(p)).collect(),
+            params
+                .iter()
+                .cloned()
+                .filter(|p| !env.contains_key(p))
+                .collect(),
             Box::new(check_environment(*body, env)?),
         )),
         Expression::SExpression(head, tail) => Some(Expression::SExpression(
@@ -180,20 +209,39 @@ fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<E
     }
 }
 
-fn eval_expression(expr: &Expression, env: &HashMap<String, Value>) -> Option<Value> {
+fn eval_expression(expr: &Expression, env: &mut HashMap<String, Value>) -> Option<Value> {
     match expr {
         Expression::Number(n) => Some(Value::Number(*n)),
         Expression::Identifier(s) => env.get(s).cloned(),
         Expression::Nil => Some(Value::Nil),
-        // Expression::Lambda(params, body) => Some(Value::Function(params.clone(), *body.clone())),
         Expression::Lambda(params, body) => Some(Value::Function(
             params.clone(),
             check_environment(*body.clone(), env)?,
         )),
+        Expression::Define(s, expr) => {
+            let res = eval_expression(expr, env)?;
+            env.insert(s.clone(), res);
+            None
+        }
+        Expression::If(cond, if_branch, else_branch) => {
+            let cond = eval_expression(&**cond, env)?;
+            match cond {
+                Value::Number(n) => {
+                    if n != 0.0 {
+                        eval_expression(&**if_branch, env)
+                    } else {
+                        eval_expression(&**else_branch, env)
+                    }
+                }
+                _ => None,
+            }
+        }
         Expression::SExpression(head, tail) => {
             let args = tail
                 .iter()
-                .map(|v| eval_expression(v, &env).expect("Invalid expression!"))
+                .map(|v| {
+                    eval_expression(v, env).expect(format!("Invalid expression!\nexpr:\t{:?}\nenv:\t{:?}", v, env).as_str())
+                })
                 .collect::<Vec<Value>>();
             match &**head {
                 Expression::Identifier(s) => {
@@ -216,12 +264,22 @@ fn eval_expression(expr: &Expression, env: &HashMap<String, Value>) -> Option<Va
                             panic!("{:?} is not a number!", x);
                         });
                     } else {
-                        panic!("Unknown identifier {}!", s);
+                        let f = env.get(s)?;
+                        if let Value::Function(params, body) = f {
+                            let mut map = env.clone();
+                            assert!(args.len() <= params.len());
+                            for (i, arg) in args.iter().enumerate() {
+                                map.insert(params[i].clone(), arg.clone());
+                            }
+                            return eval_expression(&body, &mut map);
+                        } else {
+                            panic!("{} is not a known function!", s);
+                        }
                     }
                 }
                 _ => (),
             }
-            let res = eval_expression(&**head, &env)?;
+            let res = eval_expression(&**head, env)?;
             match res {
                 Value::Function(params, body) => {
                     let mut map = env.clone();
@@ -229,7 +287,7 @@ fn eval_expression(expr: &Expression, env: &HashMap<String, Value>) -> Option<Va
                     for (i, arg) in args.iter().enumerate() {
                         map.insert(params[i].clone(), arg.clone());
                     }
-                    eval_expression(&body, &map)
+                    eval_expression(&body, &mut map)
                 }
                 Value::Number(n) => panic!("{} is a number, not a function!", n),
                 Value::Nil => panic!("Nil is not callable!"),
@@ -238,10 +296,30 @@ fn eval_expression(expr: &Expression, env: &HashMap<String, Value>) -> Option<Va
     }
 }
 
+fn main_loop() {
+    let mut env: HashMap<String, Value> = HashMap::new();
+    let stdin = std::io::stdin();
+    let mut stdout = std::io::stdout();
+    loop {
+        print!("ready> ");
+        stdout.flush().ok().expect("Error flushing!");
+        let mut input = String::new();
+        stdin.read_line(&mut input).expect("Error reading string!");
+
+        if input == "env\n" {
+            println!("{:?}", env);
+            continue;
+        }
+
+        let mut tokens = tokenize(&input);
+        let parsed = parse_expression(&mut tokens).expect("Error parsing input!");
+        match eval_expression(&parsed, &mut env) {
+            Some(Value::Number(n)) => println!("{}", n),
+            _ => (),
+        }
+    }
+}
+
 fn main() {
-    let y_comb = "(lambda (f) (lambda (x) (f x x)) (lambda (x) (f x x)))";
-    // let src = "(((lambda (x) (lambda (y) (+ x y))) 2) 3)";
-    let mut test = tokenize(&y_comb.to_string());
-    let res = parse_expression(&mut test).unwrap();
-    println!("{:?}", eval_expression(&res, &HashMap::new()));
+    main_loop();
 }
