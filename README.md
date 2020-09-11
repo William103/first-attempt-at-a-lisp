@@ -18,9 +18,20 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - The built in operator `+`, which adds its arguments.
    * Ex. `(+ 1 2)` evaluates to `3.0`
    * Ex. `(+ 1 2 -3)` evaluates to `0.0`
+ - The built in operator `-`, which subtracts its arguments (**Note**: must take exactly 2 arguments).
+   * Ex. `(- 3.2 3)` evaluates to `0.2`
  - The built in operator `*`, which multiplies its arguments.
    * Ex. `(* 3 2)` evaluates to `6.0`
    * Ex. `(* 1 2 3 4 5)` evaluates to `120.0`
+ - The built in operator `/`, which divides its arguments (**Note**: must take exactly 2 arguments).
+   * Ex. `(/ 3 2)` evaluates to `1.5`
+ - The built in operator `<`, which returns 1 if its first argument is less than its second argument and 0 otherwise
+   * Ex. `(< 3 2)` returns `0.0`
+   * Ex. `(< 2 3)` returns `1.0`
+ - The built in operator `int`, which returns 1 if all of its arguments are integers and 0 otherwise
+   * Ex. `(int 3.2)` returns `0.0`
+   * Ex. `(int 2 3.0 5)` returns `1.0`
+   * Ex. `(int 3.2 3 5)` returns `0.0`
  - The built in operator `if`, which, if the first argument (the condition) evaluates to `0.0` evaluates to the third argument, otherwise the second argument.
    * Ex. `(if 0 1 2)` evaluates to `2`
    * Ex. `(if 1 1 2)` evaluates to `1`
@@ -32,3 +43,8 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - Defining symbols. This consists of the keyword `define` followed by an identifier (any sequence of non-whitespace, non-parentheses characters that aren't a keyword; this does include sequences starting with numbers, so `5foo` is a valid variable name) followed by an expression to bind to that symbol. **Note**: shadowing isn't a thing. Symbols bound by `define` trump symbols bound by `lambda`.
    * Ex. `(define x 3)` binds the value `3` to the symbol `x`
    * Ex. `(define fact (lambda (n) (if n (* n (fact (+ n -1))) 1)))` binds the factorial function to the symbol `fact`
+   * Ex. `(define not (lambda (b) (if b 0 1)))` binds to the symbol `not` the function that inverts a "boolean"
+   * Ex. `(define >= (lambda (a b) (not (< a b))))` binds to the symbol `>=` the `>=` function.
+
+# Samples
+See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can rrun it with `cargo run --release < collatz.scm`. There will be quite a few artifacts from the REPL, and it will crash upon reaching EOF, but it does end up working, and printing the correct answer. Notice how, since input still kinda sucks right now, all the top-level bindings must be on their own line. I will fix that eventually.

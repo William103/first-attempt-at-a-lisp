@@ -240,7 +240,9 @@ fn eval_expression(expr: &Expression, env: &mut HashMap<String, Value>) -> Optio
             let args = tail
                 .iter()
                 .map(|v| {
-                    eval_expression(v, env).expect(format!("Invalid expression!\nexpr:\t{:?}\nenv:\t{:?}", v, env).as_str())
+                    eval_expression(v, env).expect(
+                        format!("Invalid expression!\nexpr:\t{:#?}\nenv:\t{:#?}", v, env).as_str(),
+                    )
                 })
                 .collect::<Vec<Value>>();
             match &**head {
@@ -252,7 +254,7 @@ fn eval_expression(expr: &Expression, env: &mut HashMap<String, Value>) -> Optio
                                     return Some(Value::Number(n2 + *n));
                                 }
                             }
-                            panic!("{:?} is not a number!", x);
+                            panic!("{:#?} is not a number!", x);
                         });
                     } else if s.as_str() == "*" {
                         return args.iter().fold(Some(Value::Number(1.0)), |acc, x| {
@@ -261,8 +263,43 @@ fn eval_expression(expr: &Expression, env: &mut HashMap<String, Value>) -> Optio
                                     return Some(Value::Number(n2 * *n));
                                 }
                             }
-                            panic!("{:?} is not a number!", x);
+                            panic!("{:#?} is not a number!", x);
                         });
+                    } else if s.as_str() == "int" {
+                        return Some(Value::Number(
+                            if args.iter().all(|x| match x {
+                                Value::Number(n) => *n == n.floor(),
+                                _ => false,
+                            }) {
+                                1.0
+                            } else {
+                                0.0
+                            },
+                        ));
+                    } else if s.as_str() == "-" {
+                        assert_eq!(args.len(), 2);
+                        if let Value::Number(n1) = args[0] {
+                            if let Value::Number(n2) = args[1] {
+                                return Some(Value::Number(n1 - n2));
+                            }
+                        }
+                        panic!("{:#?} or {:#?} is not a number!", args[0], args[1]);
+                    } else if s.as_str() == "/" {
+                        assert_eq!(args.len(), 2);
+                        if let Value::Number(n1) = args[0] {
+                            if let Value::Number(n2) = args[1] {
+                                return Some(Value::Number(n1 / n2));
+                            }
+                        }
+                        panic!("{:#?} or {:#?} is not a number!", args[0], args[1]);
+                    } else if s.as_str() == "<" {
+                        assert_eq!(args.len(), 2);
+                        if let Value::Number(n1) = args[0] {
+                            if let Value::Number(n2) = args[1] {
+                                return Some(Value::Number(if n1 < n2 { 1.0 } else { 0.0 }));
+                            }
+                        }
+                        panic!("{:#?} or {:#?} is not a number!", args[0], args[1]);
                     } else {
                         let f = env.get(s)?;
                         if let Value::Function(params, body) = f {
@@ -307,7 +344,7 @@ fn main_loop() {
         stdin.read_line(&mut input).expect("Error reading string!");
 
         if input == "env\n" {
-            println!("{:?}", env);
+            println!("{:#?}", env);
             continue;
         }
 
