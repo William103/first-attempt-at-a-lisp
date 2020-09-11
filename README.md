@@ -1,5 +1,5 @@
 # What is it?
-This is a really basic lisp interpreter. I went into this just as an exercise and out of curiosity, having no idea what I'm doing, just trying to make it work, so I am fully aware that this code is garbage and probably full of sneaky bugs. 
+This is a really basic lisp interpreter. I went into this just as an exercise and out of curiosity, having no idea what I'm doing, just trying to make it work, so I am fully aware that this code is garbage and probably full of sneaky bugs and I am confident that there are much, much better ways of doing things than the way I did (or at least I hope so).
 
 # Compilation
 Just your standard `cargo build` or `cargo build --release`. 
