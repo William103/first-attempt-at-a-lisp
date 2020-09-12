@@ -3,11 +3,13 @@ use crate::tokenizer::{TokenType, TokenIterator};
 #[derive(Clone, Debug)]
 pub enum Expression {
     Number(f64),
+    Integer(isize),
     Identifier(String),
     SExpression(Box<Expression>, Vec<Expression>),
     Lambda(Vec<String>, Box<Expression>),
     Define(String, Box<Expression>),
     If(Box<Expression>, Box<Expression>, Box<Expression>),
+    Bool(bool),
     Nil,
 }
 
@@ -71,10 +73,13 @@ pub fn parse_expression(current: &mut TokenIterator) -> Result<Expression, Strin
         }
         Ok(TokenType::CloseParen) => Err(format!("Unexpected ')'!")),
         Ok(TokenType::Identifier(s)) => Ok(Expression::Identifier(s.to_string())),
+        Ok(TokenType::Integer(n)) => Ok(Expression::Integer(*n)),
         Ok(TokenType::Number(n)) => Ok(Expression::Number(*n)),
         Ok(TokenType::Lambda) => Err(format!("Lambda not expected in this position!")),
         Ok(TokenType::Define) => Err(format!("Define not expected in this position!")),
         Ok(TokenType::If) => Err(format!("If not expected in this position!")),
+        Ok(TokenType::True) => Ok(Expression::Bool(true)),
+        Ok(TokenType::False) => Ok(Expression::Bool(false)),
         Err(_) => Err(format!("Error!")),
     }
 }

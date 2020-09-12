@@ -5,8 +5,11 @@ pub enum TokenType {
     Lambda,
     Define,
     If,
+    True,
+    False,
     Identifier(String),
     Number(f64),
+    Integer(isize),
 }
 
 #[derive(Debug)]
@@ -35,18 +38,22 @@ impl TokenIterator {
         match current.as_str() {
             "(" => Some(TokenType::OpenParen),
             ")" => Some(TokenType::CloseParen),
+            "#t" => Some(TokenType::True),
+            "#f" => Some(TokenType::False),
             s => {
-                if let Ok(n) = s.parse::<f64>() {
-                    Some(TokenType::Number(n))
-                } else { // TODO: match?
-                    if s == "lambda" {
-                        Some(TokenType::Lambda)
-                    } else if s == "define" {
-                        Some(TokenType::Define)
-                    } else if s == "if" {
-                        Some(TokenType::If)
+                if let Ok(n) = s.parse::<isize>() {
+                    Some(TokenType::Integer(n))
+                } else {
+                    // TODO: match?
+                    if let Ok(n) = s.parse::<f64>() {
+                        Some(TokenType::Number(n))
                     } else {
-                        Some(TokenType::Identifier(s.to_string()))
+                        match s {
+                            "lambda" => Some(TokenType::Lambda),
+                            "define" => Some(TokenType::Define),
+                            "if" => Some(TokenType::If),
+                            _ => Some(TokenType::Identifier(s.to_string())),
+                        }
                     }
                 }
             }

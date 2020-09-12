@@ -1,14 +1,6 @@
-(define not
-  (lambda (n)
-    (if n 0 1)))
-
 (define even
   (lambda (n)
     (int (/ n 2))))
-
-(define =
-  (lambda (a b)
-    (not (- a b))))
 
 (define >=
   (lambda (a b)
@@ -37,5 +29,5 @@
         m
         (search (+ n 1) (max (collatz n) m)))))
 
-(search 50 0)
+(display (search 50 0))
 exit
