@@ -26,7 +26,15 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `(not #t)` evaluates to false
    * Ex. `(not 3)` evaluates to false
    * Ex. `(not #f)` evaluates to true
- - The built in procedure `cons` which takes two arguments and returns a pair created from them. **NOTE**: There is a bug with pairs. If a function references a pair from outside its scope it will crash. For example, the function `(define test-func (lambda (p) (lambda (x) (cons (+ x (car p)) (+ x (cdr p))))))` will cause it to crash. I know why the bug is occurring, it will just likely be a ton of work to fix, so I haven't done that yet.
+ - The built in procedure `cons` which takes two arguments and returns a pair created from them. **NOTE**: There is a bug with pairs. If a function references a pair from outside its scope it will crash. For example, calling the function
+```
+(define test-func
+  (lambda (p)
+    (lambda (x)
+      (cons (+ x (car p))
+            (+ x (cdr p))))))
+```
+ on some pair will cause it to crash. I know why the bug is occurring, it will just likely be a ton of work to fix, so I haven't done that yet.
    * Ex. `(cons 1 2)` evaluates to `(1 . 2)`
    * Ex. `(cons 1 (cons 2 (cons 3 (cons ()))))` evaluates to `(1 . 2 . 3 . ())`
  - The built in procedure `car` which takes a pair and returns its first element.
