@@ -22,11 +22,7 @@ fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<E
             }
             Some(Value::Nil) => Some(Expression::Nil),
             Some(Value::Bool(b)) => Some(Expression::Bool(*b)),
-            Some(Value::Pair(_, _)) => None,
-            // Some(Value::Pair(a, b)) => Some(Expression::Pair(
-            //     Box::new(check_environment(a.clone(), env)?),
-            //     Box::new(check_environment(b.clone(), env)?),
-            // )),
+            Some(Value::Pair(_, _)) => None,  // TODO: fix bug here, should actually evaluate correctly
             None => Some(Expression::Identifier(s.clone())),
         },
         Expression::Lambda(params, body) => Some(Expression::Lambda(
