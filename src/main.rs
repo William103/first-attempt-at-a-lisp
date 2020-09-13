@@ -82,6 +82,7 @@ fn main_loop<T: Iterator<Item = String> + std::fmt::Debug>(mut lines: T, repl: b
                 Ok(Value::Number(n)) => println!("{}", n),
                 Ok(Value::Bool(b)) => println!("{}", b),
                 Ok(Value::Integer(n)) => println!("{}", n),
+                Ok(Value::Pair(a, b)) => println!("({:?} . {:?})", a, b),
                 Err(msg) => println!("{}", msg),
                 _ => (),
             }

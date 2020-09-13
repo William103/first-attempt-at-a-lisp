@@ -8,6 +8,7 @@ pub enum Value {
     Function(Vec<String>, Expression),
     Bool(bool),
     Integer(isize),
+    Pair(Box<Value>, Box<Value>),
     Nil,
 }
 
@@ -21,6 +22,11 @@ fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<E
             }
             Some(Value::Nil) => Some(Expression::Nil),
             Some(Value::Bool(b)) => Some(Expression::Bool(*b)),
+            Some(Value::Pair(_, _)) => None,
+            // Some(Value::Pair(a, b)) => Some(Expression::Pair(
+            //     Box::new(check_environment(a.clone(), env)?),
+            //     Box::new(check_environment(b.clone(), env)?),
+            // )),
             None => Some(Expression::Identifier(s.clone())),
         },
         Expression::Lambda(params, body) => Some(Expression::Lambda(
@@ -59,6 +65,7 @@ pub fn eval_expression(
             params.clone(),
             check_environment(*body.clone(), env).ok_or("Check environment failed!")?,
         )),
+        // Expression::Pair(a, b) => Ok(Value::Pair(Box::new(eval_expression(a, env)?), Box::new(eval_expression(b, env)?))),
         Expression::Define(s, expr) => {
             let res = eval_expression(expr, env)?;
             env.insert(s.clone(), res);
@@ -265,6 +272,51 @@ pub fn eval_expression(
                                 ))
                             }
                         }
+                        "cons" => {
+                            if args.len() != 2 {
+                                Err(format!("Expected two arguments to `cons`, got {:#?}", args))
+                            } else {
+                                Ok(Value::Pair(
+                                    Box::new(args[0].clone()),
+                                    Box::new(args[1].clone()),
+                                ))
+                            }
+                        }
+                        "car" => {
+                            if args.len() != 1 {
+                                Err(format!("Expected one argument to `car`, got {:#?}", args))
+                            } else {
+                                match args[0].clone() {
+                                    Value::Pair(a, _) => Ok(*a),
+                                    _ => Err(format!("{:#?} not a pair!", args[0]))
+                                }
+                            }
+                        }
+                        "cdr" => {
+                            if args.len() != 1 {
+                                Err(format!("Expected one argument to `cdr`, got {:#?}", args))
+                            } else {
+                                match &args[0] {
+                                    Value::Pair(_, b) => Ok(*b.clone()),
+                                    _ => Err(format!("{:#?} not a pair!", args[0]))
+                                }
+                            }
+                        }
+                        "list" => {
+                            Ok(args.iter().rfold(Value::Nil, |acc, x| {
+                                Value::Pair(Box::new(x.clone()), Box::new(acc))
+                            }))
+                        }
+                        "null?" => {
+                            if args.len() != 1 {
+                                Err(format!("Expected one argument to `null?`, got {:#?}", args))
+                            } else {
+                                Ok(match &args[0] {
+                                    Value::Nil => Value::Bool(true),
+                                    _ => Value::Bool(false),
+                                })
+                            }
+                        }
                         s => {
                             let f = env.get(s).ok_or(format!("Symbol {} not found!", s))?;
                             if let Value::Function(params, body) = f {
@@ -295,6 +347,7 @@ pub fn eval_expression(
                         Value::Nil => Err(format!("Nil is not callable!")),
                         Value::Bool(b) => Err(format!("{} is a boolean, not a function!", b)),
                         Value::Integer(n) => Err(format!("{} is an integer, not a function!", n)),
+                        Value::Pair(_, _) => Err(format!("Expected a function, got a pair!")),
                     }
                 }
             }

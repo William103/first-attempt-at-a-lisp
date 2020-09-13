@@ -18,6 +18,9 @@ pub fn parse_expression(current: &mut TokenIterator) -> Result<Expression, Strin
         Ok(TokenType::OpenParen) => {
             // TODO: clean this code up. Organize better, convert `if let`'s to match
             let next = current.next().ok_or("Unexpected EOF!");
+            if let Ok(TokenType::CloseParen) = next {
+                return Ok(Expression::Nil);
+            }
             if let Ok(TokenType::If) = next {
                 current.next();
                 let cond = parse_expression(current)?;

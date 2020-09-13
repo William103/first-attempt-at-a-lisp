@@ -17,6 +17,7 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - Booleans
    * Ex. `#t` evaluates to true
    * Ex. `#f` evaluates to false
+ - The empty list `()` (**NOTE**: unlike Scheme, the empty list is just `()`, not `'()`)
  - S-expressions.
    * Ex. `(op arg1 arg2)` evaluates to the result of `op` called on `arg1` and `arg2`.
  - The built in procedure `display` which prints its arguments and evaluates to the special value Nil (same as defines later on)
@@ -25,6 +26,18 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `(not #t)` evaluates to false
    * Ex. `(not 3)` evaluates to false
    * Ex. `(not #f)` evaluates to true
+ - The built in procedure `cons` which takes two arguments and returns a pair created from them.
+   * Ex. `(cons 1 2)` evaluates to `(1 . 2)`
+   * Ex. `(cons 1 (cons 2 (cons 3 (cons ()))))` evaluates to `(1 . 2 . 3 . ())`
+ - The built in procedure `car` which takes a pair and returns its first element.
+   * Ex. `(car (cons 1 2))` evaluates to `1`
+ - The built in procedure `cdr` which takes a pair and returns its second element.
+   * Ex. `(cdr (cons 1 2))` evaluates to `2`
+ - The built in procedure `list` which returns a list of its arguments as nested pairs.
+   * Ex. `(list 1 2 3)` evaluates to `(1 . 2 . 3 . ())`
+ - The built in procedure `null?` which returns true if its argument is the empty list.
+   * Ex. `(null? ())` evaluates to true
+   * Ex. `(null? (cons 1 2))` evaluates to false
  - The built in procedure `+`, which adds its arguments.
    * Ex. `(+ 1 2)` evaluates to `3`
    * Ex. `(+ 1 2 -3)` evaluates to `0`
@@ -68,4 +81,4 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `(define >= (lambda (a b) (not (< a b))))` binds to the symbol `>=` the `>=` function.
 
 # Samples
-See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can run it with `cargo run --release < collatz.scm`.
+See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can run it with `cargo run --release < collatz.scm`. There is also the file `lists.scm` which gives some examples of how to program with lists.
