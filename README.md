@@ -82,3 +82,12 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
 
 # Samples
 See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can run it with `cargo run --release < collatz.scm`. There is also the file `lists.scm` which gives some examples of how to program with lists.
+
+# TODO
+ 1. Fix pair bug.
+ 5. Implement `std::fmt::Display` for `Value` to allow for much prettier output.
+ 6. General maintenance: i.e. cleaning up code, better error handling (actually useful debug info?), document/comment the code.
+ 7. Look into optimizations, some kind of tail-call optimization.
+ 3. Add strings and chars.
+ 4. Add symbols and quote.
+ 2. Add macros? Use macros to implement standard library in the language.

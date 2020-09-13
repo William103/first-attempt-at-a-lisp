@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub enum Value {
-    // TODO: add more types. String? Pair? Vector? Char? Symbol?
+    // TODO: add more types. String? Vector? Char? Symbol?
     Number(f64),
     Function(Vec<String>, Expression),
     Bool(bool),
@@ -87,7 +87,6 @@ pub fn eval_expression(
                 .collect::<Result<Vec<Value>, String>>()?;
             match &**head {
                 Expression::Identifier(s) => {
-                    // TODO: more operators?
                     match s.as_str() {
                         "+" => args
                             .iter()
