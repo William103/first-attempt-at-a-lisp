@@ -1,8 +1,6 @@
 use crate::parser::Expression;
 use std::collections::HashMap;
 
-/// This enum represents all the types of values in my Scheme dialect. Currently that means floats,
-/// integers, booleans, functions, pairs, and nil.
 #[derive(Clone, Debug)]
 pub enum Value {
     // TODO: add more types. String? Vector? Char? Symbol?
@@ -14,9 +12,6 @@ pub enum Value {
     Nil,
 }
 
-/// Prints values the obvious way. I couldn't quite figure out how to tell if something might be a
-/// list or not, and how to print it nicely, so it does just print all pairs as `(car . cdr)`
-/// unfortunately.
 impl std::fmt::Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -31,8 +26,6 @@ impl std::fmt::Display for Value {
     }
 }
 
-/// Function for converting a value back into an expression. Mostly useless, except for checking
-/// environment for pairs.
 fn value_to_expression(val: Value) -> Expression {
     match val {
         Value::Bool(b) => Expression::Bool(b),
@@ -47,8 +40,6 @@ fn value_to_expression(val: Value) -> Expression {
     }
 }
 
-/// This function takes an expression and replaces most of the known identifiers with their values.
-/// It does respect shadowing.
 fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<Expression> {
     match expr {
         Expression::Identifier(s) => match env.get(&s) {
@@ -80,10 +71,6 @@ fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<E
 }
 
 // TODO: optimizations? blowing up the stack is way too common: add loops or tail-call optimization; somehow
-/// This function is the heart of the "interpreter". It takes an expression and returns the value
-/// it evaluated to. It's a gigantic, messy, recursive pile of pattern matching that somehow gets
-/// the job done. The bulk of the function is actually implementing built-in functions, so I might
-/// separate those into a different file.
 pub fn eval_expression(
     expr: &Expression,
     env: &mut HashMap<String, Value>,

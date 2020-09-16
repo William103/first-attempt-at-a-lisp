@@ -10,8 +10,6 @@ use std::io::prelude::*;
 
 // TODO: stl?
 
-/// Wrapper over `stdio` to allow the same top-level evaluation code to work for the REPL or a
-/// file.
 #[derive(Debug)]
 struct StdioLinesIterator {
     stdin: std::io::Stdin,
@@ -36,10 +34,6 @@ impl Iterator for StdioLinesIterator {
     }
 }
 
-/// This is the main REPL/top-level evaluation loop. By some generic magic it works for either one.
-/// It's pretty simple. It mostly just reads lines until the parenthesis are matched, then
-/// parses and evaluates the string, possibly printing the result. It also handles a few special
-/// commands like `exit` and `env`.
 fn main_loop<T: Iterator<Item = String>>(mut lines: T, repl: bool) {
     let mut env: HashMap<String, Value> = HashMap::new();
     let mut stdout = std::io::stdout();
@@ -105,7 +99,6 @@ fn main_loop<T: Iterator<Item = String>>(mut lines: T, repl: bool) {
     }
 }
 
-/// Parses command-line args and gets the ball rolling.
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() > 1 {
