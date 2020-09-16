@@ -17,7 +17,7 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - Booleans
    * Ex. `#t` evaluates to true
    * Ex. `#f` evaluates to false
- - The empty list `()` (**NOTE**: unlike Scheme, the empty list is just `()`, not `'()`)
+ - The empty list `()` (**NOTE**: unlike Scheme, as of right now, the empty list is just `()`, not `'()`)
  - S-expressions.
    * Ex. `(op arg1 arg2)` evaluates to the result of `op` called on `arg1` and `arg2`.
  - The built in procedure `display` which prints its arguments and evaluates to the special value Nil (same as defines later on)
@@ -26,15 +26,7 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `(not #t)` evaluates to false
    * Ex. `(not 3)` evaluates to false
    * Ex. `(not #f)` evaluates to true
- - The built in procedure `cons` which takes two arguments and returns a pair created from them. **NOTE**: There is a bug with pairs. If a function references a pair from outside its scope it will crash. For example, calling the function
-```
-(define test-func
-  (lambda (p)
-    (lambda (x)
-      (cons (+ x (car p))
-            (+ x (cdr p))))))
-```
- on some pair will cause it to crash. I know why the bug is occurring, it will just likely be a ton of work to fix, so I haven't done that yet.
+ - The built in procedure `cons` which takes two arguments and returns a pair created from them.
    * Ex. `(cons 1 2)` evaluates to `(1 . 2)`
    * Ex. `(cons 1 (cons 2 (cons 3 (cons ()))))` evaluates to `(1 . 2 . 3 . ())`
  - The built in procedure `car` which takes a pair and returns its first element.
@@ -83,7 +75,7 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `(lambda (x y) (+ x y))` evaluates to a function that sums its arguments
    * Ex. `((lambda (x y) (+ x y)) 3 2)` evaluates to `5`
    * Ex. `(((lambda (x) (lambda (y) (+ x y))) 3) 2)` also evaluates to `5`
- - Defining symbols. This consists of the keyword `define` followed by an identifier (any sequence of non-whitespace, non-parentheses characters that aren't a keyword; this does include sequences starting with numbers, so `5foo` is a valid variable name) followed by an expression to bind to that symbol. **Note**: shadowing isn't a thing. Symbols bound by `define` trump symbols bound by `lambda`.
+ - Defining symbols. This consists of the keyword `define` followed by an identifier (any sequence of non-whitespace, non-parentheses characters that aren't a keyword; this does include sequences starting with numbers, so `5foo` is a valid variable name) followed by an expression to bind to that symbol. Shadowing is allowed and behaves like you would expect.
    * Ex. `(define x 3)` binds the value `3` to the symbol `x`
    * Ex. `(define fact (lambda (n) (if n (* n (fact (+ n -1))) 1)))` binds the factorial function to the symbol `fact`
    * Ex. `(define >= (lambda (a b) (not (< a b))))` binds to the symbol `>=` the `>=` function.
@@ -92,10 +84,8 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
 See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can run it with `cargo run --release < collatz.scm`. There is also the file `lists.scm` which gives some examples of how to program with lists.
 
 # TODO
- 1. Fix pair bug.
- 5. Implement `std::fmt::Display` for `Value` to allow for much prettier output.
- 6. General maintenance: i.e. cleaning up code, better error handling (actually useful debug info?), document/comment the code.
- 7. Look into optimizations, some kind of tail-call optimization.
+ 1. General maintenance: i.e. cleaning up code, better error handling (actually useful debug info?), document/comment the code.
+ 2. Look into optimizations, some kind of tail-call optimization.
  3. Add strings and chars.
  4. Add symbols and quote.
- 2. Add macros? Use macros to implement standard library in the language.
+ 5. Add macros? Use macros to implement standard library in the language.

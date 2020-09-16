@@ -42,7 +42,11 @@ fn main_loop<T: Iterator<Item = String> + std::fmt::Debug>(mut lines: T, repl: b
             print!("ready> ");
             stdout.flush().ok().expect("Error flushing!");
         }
-        let mut input = lines.next().expect("Unexpected EOF").to_string();
+        let mut input: String;
+        match lines.next() {
+            Some(s) => input = s,
+            None => break,
+        }
         loop {
             let mut parens = 0;
             for ch in input.chars() {
@@ -79,12 +83,9 @@ fn main_loop<T: Iterator<Item = String> + std::fmt::Debug>(mut lines: T, repl: b
         let parsed = parsed.unwrap();
         if repl {
             match eval_expression(&parsed, &mut env) {
-                Ok(Value::Number(n)) => println!("{}", n),
-                Ok(Value::Bool(b)) => println!("{}", b),
-                Ok(Value::Integer(n)) => println!("{}", n),
-                Ok(Value::Pair(a, b)) => println!("({:?} . {:?})", a, b),
+                Ok(Value::Nil) => (),
+                Ok(v) => println!("{}", v),
                 Err(msg) => println!("{}", msg),
-                _ => (),
             }
         } else {
             match eval_expression(&parsed, &mut env) {

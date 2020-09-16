@@ -30,4 +30,3 @@
         (search (+ n 1) (max (collatz n) m)))))
 
 (display (search 50 0))
-exit

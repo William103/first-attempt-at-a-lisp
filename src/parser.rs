@@ -10,6 +10,7 @@ pub enum Expression {
     Define(String, Box<Expression>),
     If(Box<Expression>, Box<Expression>, Box<Expression>),
     Bool(bool),
+    Pair(Box<Expression>, Box<Expression>),
     Nil,
 }
 

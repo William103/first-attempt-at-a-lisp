@@ -44,7 +44,6 @@ impl TokenIterator {
                 if let Ok(n) = s.parse::<isize>() {
                     Some(TokenType::Integer(n))
                 } else {
-                    // TODO: match?
                     if let Ok(n) = s.parse::<f64>() {
                         Some(TokenType::Number(n))
                     } else {
