@@ -1,4 +1,5 @@
 #[derive(Clone, Debug)]
+/// This enum represents the different kinds of tokens. Pretty straightforward.
 pub enum TokenType {
     OpenParen,
     CloseParen,
@@ -13,6 +14,9 @@ pub enum TokenType {
     Integer(isize),
 }
 
+/// This is dumb and useless, mostly just here because I'm too lazy to get rid of it. I originally
+/// planned on tokenizing everything as I parsed it, but ended up tokenizing everything ahead of
+/// time anyway, so it's literally just a wrapper over `Iter`.
 #[derive(Debug)]
 pub struct TokenIterator {
     data: Vec<String>,
@@ -31,6 +35,9 @@ impl Iterator for TokenIterator {
 }
 
 impl TokenIterator {
+    /// This is the only useful function in this struct. It's basically just the `*it` idiom from
+    /// C++ but in Rust. This is also where I actually convert the tokenizied `String`s into
+    /// `TokenType`s, but that doesn't need to be here at all.
     pub fn get_state(&self) -> Option<TokenType> {
         if self.index >= self.data.len() {
             return None;
@@ -62,6 +69,8 @@ impl TokenIterator {
     }
 }
 
+/// This is the function that does all the work. It really should just return a `Vec<TokenType>`,
+/// but whatever.
 pub fn tokenize(s: &String) -> TokenIterator {
     let mut v = Vec::new();
     let mut c = s.chars();

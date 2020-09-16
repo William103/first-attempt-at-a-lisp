@@ -1,5 +1,8 @@
 use crate::tokenizer::{TokenIterator, TokenType};
 
+/// This enum represents all the possible expressions. It kind of ended up being almost a copy of
+/// `Value`, and I frequently needed to switch between them. I'm not sure if that's a good idea,
+/// but I have **ABSOLUTELY NO CLUE** what I'm doing, so whatever.
 #[derive(Clone, Debug)]
 pub enum Expression {
     Number(f64),
@@ -14,6 +17,11 @@ pub enum Expression {
     Nil,
 }
 
+/// This is a very important function. It takes an iterator over the tokens (which ended up
+/// basically being a wrapper for a `Vec` on accident) and parses it into and `Expression`. It's a
+/// pretty big, messy, recursive pile of pattern matching, but not quite as bad as
+/// `eval_expression`. This was extremely difficult to write at first, but ended up not being too
+/// bad once I figured it out. Lisp's syntax is just so wonderfully simple.
 pub fn parse_expression(current: &mut TokenIterator) -> Result<Expression, String> {
     match &current.get_state().ok_or("Invalid state!") {
         Ok(TokenType::OpenParen) => {
@@ -61,7 +69,6 @@ pub fn parse_expression(current: &mut TokenIterator) -> Result<Expression, Strin
                     Ok(Expression::Lambda(args, expr))
                 }
                 _ => {
-                    // must be s-expression
                     let car = match next? {
                         TokenType::CloseParen => Expression::Nil,
                         _ => parse_expression(current).expect("Error parsing function"),
