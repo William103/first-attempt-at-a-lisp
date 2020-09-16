@@ -7,6 +7,7 @@ pub enum TokenType {
     If,
     True,
     False,
+    SingleQuote,
     Identifier(String),
     Number(f64),
     Integer(isize),
@@ -36,6 +37,7 @@ impl TokenIterator {
         }
         let current = &self.data[self.index];
         match current.as_str() {
+            "'" => Some(TokenType::SingleQuote),
             "(" => Some(TokenType::OpenParen),
             ")" => Some(TokenType::CloseParen),
             "#t" => Some(TokenType::True),

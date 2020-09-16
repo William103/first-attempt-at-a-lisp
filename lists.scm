@@ -21,6 +21,6 @@
   (lambda (n)
     (int (/ n 2))))
 
-(display (length (list 1 2 3 4 5)))
+(display (length '(1 2 3 4 5)))
 (display (map (lambda (x) (+ x 1)) (list 1 2 3)))
-(display (filter even? (list 0 1 2 3 4 5 6)))
+(display (filter even? '(0 1 2 3 4 5 6)))

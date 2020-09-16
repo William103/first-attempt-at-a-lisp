@@ -17,7 +17,7 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - Booleans
    * Ex. `#t` evaluates to true
    * Ex. `#f` evaluates to false
- - The empty list `()` (**NOTE**: unlike Scheme, as of right now, the empty list is just `()`, not `'()`)
+ - The empty list `()`. As you'll see later, you can actually represent this like Scheme with `'()` if you want.
  - S-expressions.
    * Ex. `(op arg1 arg2)` evaluates to the result of `op` called on `arg1` and `arg2`.
  - The built in procedure `display` which prints its arguments and evaluates to the special value Nil (same as defines later on)
@@ -34,7 +34,9 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
  - The built in procedure `cdr` which takes a pair and returns its second element.
    * Ex. `(cdr (cons 1 2))` evaluates to `2`
  - The built in procedure `list` which returns a list of its arguments as nested pairs.
-   * Ex. `(list 1 2 3)` evaluates to `(1 . 2 . 3 . ())`
+   * Ex. `(list 1 2 3)` evaluates to `(1 . (2 . (3 . ())))`
+ - List literals with `'`. Note, this is quite different from Scheme's quote, but I don't quite have symbols implemented yet.
+   * Ex. `'(1 2 3 4)` evaluates to `(1 . (2 . (3 . (4 . ()))))`
  - The built in procedure `null?` which returns true if its argument is the empty list.
    * Ex. `(null? ())` evaluates to true
    * Ex. `(null? (cons 1 2))` evaluates to false
