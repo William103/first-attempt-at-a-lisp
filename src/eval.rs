@@ -9,6 +9,8 @@ pub enum Value {
     Bool(bool),
     Integer(isize),
     Pair(Box<Value>, Box<Value>),
+    Char(char),
+    String(String),
     Nil,
 }
 
@@ -21,6 +23,8 @@ impl std::fmt::Display for Value {
             Value::Bool(false) => write!(f, "#f"),
             Value::Integer(n) => write!(f, "{}", *n),
             Value::Pair(car, cdr) => write!(f, "({} . {})", car, cdr),
+            Value::Char(c) => write!(f, "#\\{}", c),
+            Value::String(s) => write!(f, "{}", s),
             Value::Nil => write!(f, "()"),
         }
     }
@@ -32,6 +36,8 @@ fn value_to_expression(val: Value) -> Expression {
         Value::Number(n) => Expression::Number(n),
         Value::Integer(n) => Expression::Integer(n),
         Value::Function(p, b) => Expression::Lambda(p, Box::new(b)),
+        Value::Char(c) => Expression::Char(c),
+        Value::String(s) => Expression::String(s),
         Value::Nil => Expression::Nil,
         Value::Pair(car, cdr) => Expression::Pair(
             Box::new(value_to_expression(*car)),
@@ -43,17 +49,7 @@ fn value_to_expression(val: Value) -> Expression {
 fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<Expression> {
     match expr {
         Expression::Identifier(s) => match env.get(&s) {
-            Some(Value::Integer(n)) => Some(Expression::Integer(*n)),
-            Some(Value::Number(n)) => Some(Expression::Number(*n)),
-            Some(Value::Function(params, body)) => {
-                Some(Expression::Lambda(params.clone(), Box::new(body.clone())))
-            }
-            Some(Value::Nil) => Some(Expression::Nil),
-            Some(Value::Bool(b)) => Some(Expression::Bool(*b)),
-            Some(Value::Pair(car, cdr)) => Some(Expression::Pair(
-                Box::new(value_to_expression(*car.clone())),
-                Box::new(value_to_expression(*cdr.clone())),
-            )),
+            Some(v) => Some(value_to_expression(v.clone())),
             None => Some(Expression::Identifier(s.clone())),
         },
         Expression::Lambda(params, body) => Some(Expression::Lambda(
@@ -79,6 +75,8 @@ pub fn eval_expression(
         Expression::Number(n) => Ok(Value::Number(*n)),
         Expression::Integer(n) => Ok(Value::Integer(*n)),
         Expression::Bool(b) => Ok(Value::Bool(*b)),
+        Expression::Char(c) => Ok(Value::Char(*c)),
+        Expression::String(s) => Ok(Value::String(s.clone())),
         Expression::Identifier(s) => env
             .get(s)
             .cloned()
@@ -341,6 +339,65 @@ pub fn eval_expression(
                             })
                         }
                     }
+                    "string->list" => {
+                        if args.len() != 1 {
+                            Err(format!(
+                                "Expected one argument to `string->list`, got {:#?}",
+                                args
+                            ))
+                        } else {
+                            match args[0].clone() {
+                                Value::String(s) => Ok(s.chars().rfold(Value::Nil, |acc, x| {
+                                    Value::Pair(Box::new(Value::Char(x)), Box::new(acc))
+                                })),
+                                v => Err(format!(
+                                    "Expected string argument to `string->list`, got {:#?}",
+                                    v
+                                )),
+                            }
+                        }
+                    }
+                    "list->string" => {
+                        if args.len() != 1 {
+                            Err(format!(
+                                "Expected one argument to `list->string`, got {:#?}",
+                                args
+                            ))
+                        } else {
+                            match args[0].clone() {
+                                Value::Pair(car, cdr) => {
+                                    let mut res = String::new();
+                                    let mut car = car;
+                                    let mut cdr = cdr;
+                                    loop {
+                                        if let Value::Char(c) = *car {
+                                            res.push(c);
+                                        } else {
+                                            return Err(format!(
+                                                "Expected list of chars, got {:#?}",
+                                                args[0]
+                                            ));
+                                        }
+                                        if let Value::Pair(car2, cdr2) = *cdr {
+                                            car = car2;
+                                            cdr = cdr2;
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                    Ok(Value::String(res))
+                                }
+                                v => Err(format!(
+                                    "Expected list argument to `list->string`, got {:#?}",
+                                    v
+                                )),
+                            }
+                        }
+                    }
+                    "newline" => {
+                        println!();
+                        Ok(Value::Nil)
+                    }
                     s => {
                         let f = env.get(s).ok_or(format!("Symbol {} not found!", s))?;
                         if let Value::Function(params, body) = f {
@@ -369,8 +426,12 @@ pub fn eval_expression(
                         Value::Number(n) => Err(format!("{} is a number, not a function!", n)),
                         Value::Nil => Err(format!("Nil is not callable!")),
                         Value::Bool(b) => Err(format!("{} is a boolean, not a function!", b)),
+                        Value::Char(c) => Err(format!("{} is a char, not a function!", c)),
                         Value::Integer(n) => Err(format!("{} is an integer, not a function!", n)),
                         Value::Pair(_, _) => Err(format!("Expected a function, got a pair!")),
+                        Value::String(s) => {
+                            Err(format!("Expected a function, got the string {}", s))
+                        }
                     }
                 }
             }

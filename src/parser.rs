@@ -11,6 +11,8 @@ pub enum Expression {
     If(Box<Expression>, Box<Expression>, Box<Expression>),
     Bool(bool),
     Pair(Box<Expression>, Box<Expression>),
+    Char(char),
+    String(String),
     Nil,
 }
 
@@ -85,6 +87,8 @@ pub fn parse_expression(current: &mut TokenIterator) -> Result<Expression, Strin
         Ok(TokenType::If) => Err(format!("If not expected in this position!")),
         Ok(TokenType::True) => Ok(Expression::Bool(true)),
         Ok(TokenType::False) => Ok(Expression::Bool(false)),
+        Ok(TokenType::Char(c)) => Ok(Expression::Char(*c)),
+        Ok(TokenType::String(s)) => Ok(Expression::String(s[1..s.len()-1].to_string())),
         Ok(TokenType::SingleQuote) => {
             if let Some(TokenType::OpenParen) = current.next() {
                 let mut vals = Vec::new();

@@ -18,10 +18,23 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `#t` evaluates to true
    * Ex. `#f` evaluates to false
  - The empty list `()`. As you'll see later, you can actually represent this like Scheme with `'()` if you want.
+ - Chars, these work similarly to Scheme, except space doesn't quite work yet.
+   * Ex. `#\a` evaluates to the character `'a'`
+ - Strings, these work exactly how you'd expect.
+   * Ex. `"hello"` evaluates to the string `hello`
+   * Ex. `"hello\nworld"` has a newline in the middle like expected
+   * Ex. `"hello\tworld"` has a tab character in the middle like expected
+   * Ex. `"hello\\world"` evaluates to the string `hello\world`
+   * Ex. `"\"hello\""` evaluates to the string `"hello"`.
  - S-expressions.
    * Ex. `(op arg1 arg2)` evaluates to the result of `op` called on `arg1` and `arg2`.
- - The built in procedure `display` which prints its arguments and evaluates to the special value Nil (same as defines later on)
-   * Ex. `(display 3)` prints `Integer(3)` to the screen and evaluates to Nil
+ - The built in procedure `display` which prints its arguments and evaluates to the special value `Nil` (same as defines later on).
+   * Ex. `(display 3)` prints `3` to the screen and evaluates to Nil
+ - The built in procedure `newline` which just prints a newline to the screen and also evaluates to `Nil`.
+ - The built in procedure `string->list` which converts a string into a list of characters.
+   * Ex. `(string->list "hi")` evaluates to `(#\h . (#\i . ()))`
+ - The built in procedure `list->string` which converts a list of characters into a string.
+   * Ex. `(list->string '(#\h #\i))` evaluates to `"hi"`.
  - The built in procedure `not` which returns true if and only if its input evaluates to false
    * Ex. `(not #t)` evaluates to false
    * Ex. `(not 3)` evaluates to false
@@ -86,8 +99,8 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
 See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can run it with `cargo run --release < collatz.scm`. There is also the file `lists.scm` which gives some examples of how to program with lists.
 
 # TODO
- 1. General maintenance: i.e. cleaning up code, better error handling (actually useful debug info?), document/comment the code.
- 2. Look into optimizations, some kind of tail-call optimization.
- 3. Add strings and chars.
+ 1. Fix space bug: `#\ ` not being recognized as `' '`.
+ 2. General maintenance: i.e. cleaning up code, better error handling (actually useful debug info?), document/comment the code.
+ 3. Look into optimizations, some kind of tail-call optimization.
  4. Add symbols and quote.
  5. Add macros? Use macros to implement standard library in the language.

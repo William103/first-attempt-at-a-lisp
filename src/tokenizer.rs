@@ -11,6 +11,8 @@ pub enum TokenType {
     Identifier(String),
     Number(f64),
     Integer(isize),
+    Char(char),
+    String(String),
 }
 
 #[derive(Debug)]
@@ -36,6 +38,19 @@ impl TokenIterator {
             return None;
         }
         let current = &self.data[self.index];
+        if current.starts_with("#\\") {
+            let mut it = current.chars().skip(2);
+            let c = it.next();
+            if it.next().is_none() {
+                if let Some(c) = c {
+                    return Some(TokenType::Char(c));
+                }
+            } else {
+                return None;
+            }
+        } else if current.starts_with("\"") {
+            return Some(TokenType::String(current.clone()));
+        }
         match current.as_str() {
             "'" => Some(TokenType::SingleQuote),
             "(" => Some(TokenType::OpenParen),
@@ -64,29 +79,56 @@ impl TokenIterator {
 
 pub fn tokenize(s: &String) -> TokenIterator {
     let mut v = Vec::new();
-    let mut c = s.chars();
+    let mut chars = s.chars();
     let mut tempstr = String::new();
+    let mut in_string = false;
     loop {
-        let c = c.next();
+        let c = chars.next();
         match c {
             Some(c) => {
-                if c == '(' {
-                    if !tempstr.is_empty() {
+                if !in_string {
+                    if c == '"' {
+                        in_string = true;
+                        if !tempstr.is_empty() {
+                            v.push(tempstr);
+                            tempstr = String::new();
+                        }
+                        tempstr.push('"');
+                    } else if c == '(' {
+                        if !tempstr.is_empty() {
+                            v.push(tempstr);
+                            tempstr = String::new();
+                        }
+                        v.push(String::from("("));
+                    } else if c == ')' {
+                        if !tempstr.is_empty() {
+                            v.push(tempstr);
+                            tempstr = String::new();
+                        }
+                        v.push(String::from(")"));
+                    } else if c.is_whitespace() && !tempstr.is_empty() {
                         v.push(tempstr);
                         tempstr = String::new();
+                    } else if !c.is_whitespace() {
+                        tempstr.push(c);
                     }
-                    v.push(String::from("("));
-                } else if c == ')' {
-                    if !tempstr.is_empty() {
-                        v.push(tempstr);
-                        tempstr = String::new();
+                } else {
+                    match c {
+                        '\\' => match chars.next() {
+                            Some('n') => tempstr.push('\n'),
+                            Some('t') => tempstr.push('\t'),
+                            Some('\\') => tempstr.push('\\'),
+                            Some('"') => tempstr.push('"'),
+                            _ => (),
+                        },
+                        '"' => {
+                            tempstr.push('"');
+                            v.push(tempstr);
+                            tempstr = String::new();
+                            in_string = false;
+                        }
+                        c => tempstr.push(c),
                     }
-                    v.push(String::from(")"));
-                } else if c.is_whitespace() && !tempstr.is_empty() {
-                    v.push(tempstr);
-                    tempstr = String::new();
-                } else if !c.is_whitespace() {
-                    tempstr.push(c);
                 }
             }
             None => break,
