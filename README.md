@@ -96,7 +96,7 @@ This is, as of right now, an extremely tiny, barely functional subset of scheme 
    * Ex. `(define >= (lambda (a b) (not (< a b))))` binds to the symbol `>=` the `>=` function.
 
 # Samples
-See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can run it with `cargo run --release < collatz.scm`. There is also the file `lists.scm` which gives some examples of how to program with lists.
+See the file `collatz.scm` for an example program. This program finds the largest number of steps it takes to reach 1 along the collatz sequence for all numbers less than 100. You can run it with `cargo run --release < collatz.scm`. There is also the file `lists.scm` which gives some examples of how to program with lists. Similarly, there is also the file `strings.scm` which gives some examples of how to program with strings, and also recursive local helper functions, which is always fun.
 
 # TODO
  1. Fix space bug: `#\ ` not being recognized as `' '`.
