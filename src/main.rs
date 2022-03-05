@@ -18,7 +18,7 @@ struct StdioLinesIterator {
 impl StdioLinesIterator {
     fn new() -> StdioLinesIterator {
         StdioLinesIterator {
-            stdin: std::io::stdin()
+            stdin: std::io::stdin(),
         }
     }
 }
@@ -40,7 +40,7 @@ fn main_loop<T: Iterator<Item = String>>(mut lines: T, repl: bool) {
     loop {
         if repl {
             print!("ready> ");
-            stdout.flush().ok().expect("Error flushing!");
+            stdout.flush().expect("Error flushing!");
         }
         let mut input: String;
         match lines.next() {
@@ -104,8 +104,14 @@ fn main() {
     if args.len() > 1 {
         let filename = &args[1];
         let contents = std::fs::read_to_string(filename)
-            .expect(format!("Couldn't read file {}", filename).as_str());
-        main_loop(contents.lines().map(|s| s.to_string()).filter(|s| s.len() > 0), false);
+            .unwrap_or_else(|_| panic!("Couldn't read file {}", filename));
+        main_loop(
+            contents
+                .lines()
+                .map(|s| s.to_string())
+                .filter(|s| !s.is_empty()),
+            false,
+        );
     } else {
         let lines = StdioLinesIterator::new();
         main_loop(lines, true);

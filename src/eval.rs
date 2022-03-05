@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub enum Value {
-    // TODO: add more types. String? Vector? Char? Symbol?
+    // TODO: add more types. Vector? Char? Symbol?
     Number(f64),
     Function(Vec<String>, Expression),
     Bool(bool),
@@ -53,7 +53,7 @@ fn check_environment(expr: Expression, env: &HashMap<String, Value>) -> Option<E
             None => Some(Expression::Identifier(s.clone())),
         },
         Expression::Lambda(params, body) => Some(Expression::Lambda(
-            params.iter().cloned().collect(),
+            params.to_vec(),
             Box::new(check_environment(*body, env)?),
         )),
         Expression::SExpression(head, tail) => Some(Expression::SExpression(
@@ -152,7 +152,7 @@ pub fn eval_expression(
                             (v, _) => Err(format!("{:#?} is not a number!", v)),
                         }),
                     "int" => Ok(Value::Bool(args.iter().all(|x| match x {
-                        Value::Number(n) => *n == n.floor(),
+                        Value::Number(n) => (*n - n.floor()).abs() < std::f64::EPSILON,
                         Value::Integer(_) => true,
                         _ => false,
                     }))),
